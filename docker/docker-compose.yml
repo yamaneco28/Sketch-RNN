@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  sketch-rnn:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ../:/root/workspace/
+      - ../../datasets:/root/datasets/
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    # runtime: nvidia
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: 1
+    stdin_open: true
+    privileged: true

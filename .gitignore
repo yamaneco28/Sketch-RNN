@@ -1,0 +1,7 @@
+__pycache__
+.vscode
+/results/
+/wandb/
+/data/
+/env/
+test_image/

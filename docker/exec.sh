@@ -1,0 +1,1 @@
+docker-compose exec sketch-rnn fish

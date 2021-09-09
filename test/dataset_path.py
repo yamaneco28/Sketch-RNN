@@ -1,0 +1,1 @@
+datafolder = '../../datasets/QuickDrawDataset/'
