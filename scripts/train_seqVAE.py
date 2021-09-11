@@ -15,6 +15,7 @@ sns.set()
 sys.path.append('.')
 sys.path.append('..')
 from scripts.seqVAE import SeqVAE, VAELoss
+from scripts.TransformerVAE import TransformerVAE, VAELoss
 from scripts.quick_draw_dataset import QuickDrawDataset
 from scripts.plot_result import *
 from scripts.print_progress_bar import print_progress_bar
@@ -35,8 +36,8 @@ def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
     device = torch.device(f'cuda:{gpu_num[0]}' if cuda_flag else 'cpu')
     print('device:', device)
     print(f'Let\'s use {torch.cuda.device_count()} GPUs!')
-    if len(gpu_num) > 1:
-        model = nn.DataParallel(model, device_ids=gpu_num)
+    # if len(gpu_num) > 1:
+    model = nn.DataParallel(model, device_ids=gpu_num)
     model.to(device)
 
     # acceleration
@@ -46,6 +47,8 @@ def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
     # figure
     fig_reconstructed = plt.figure(figsize=(20, 10))
     fig_latent_space = plt.figure(figsize=(10, 10))
+    fig_2D_Manifold = plt.figure(figsize=(10, 10))
+    fig_latent_traversal = plt.figure(figsize=(10, 10))
     fig_loss = plt.figure(figsize=(10, 10))
 
     for epoch in range(n_epochs + 1):
@@ -176,11 +179,25 @@ def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
             fig_latent_space.savefig(
                 os.path.join(out_dir, 'latent_space.png'))
 
+            fig_2D_Manifold.clf()
+            plot_2D_Manifold(fig_2D_Manifold, model.module, device,
+                             z_sumple=valid_mean, col=20, epoch=epoch)
+            fig_2D_Manifold.savefig(
+                os.path.join(out_dir, '2D_Manifold.png'))
+
+            fig_latent_traversal.clf()
+            plot_latent_traversal(fig_latent_traversal, model.module, device,
+                                  row=valid_mean.shape[1], col=10, epoch=epoch)
+            fig_latent_traversal.savefig(
+                os.path.join(out_dir, 'latent_traversal.png'))
+
             if wandb_flag:
                 wandb.log({
                     'epoch': epoch,
                     'reconstructed': wandb.Image(fig_reconstructed),
                     'latent_space': wandb.Image(fig_latent_space),
+                    '2D_Manifold': wandb.Image(fig_2D_Manifold),
+                    'latent_traversal': wandb.Image(fig_latent_traversal),
                 })
 
         # wandb
@@ -221,7 +238,8 @@ def main(args):
         drop_last=True,
     )
 
-    model = SeqVAE(z_dim=5, input_dim=2)
+    # model = SeqVAE(z_dim=5, input_dim=2)
+    model = TransformerVAE(z_dim=10, input_dim=2)
 
     if not os.path.exists('results'):
         os.mkdir('results')
