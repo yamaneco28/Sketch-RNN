@@ -19,7 +19,7 @@ def strokes_to_lines(strokes):
     return np.array(line)
 
 
-def plot_reconstructed(fig, seq_ans, seq_hat, col=4, epoch=0):
+def plot_reconstructed(fig, seq_ans, seq_hat, col=4, epoch=None):
     seq_ans = torch2numpy(seq_ans)
     seq_hat = torch2numpy(seq_hat)
 
@@ -41,7 +41,8 @@ def plot_reconstructed(fig, seq_ans, seq_hat, col=4, epoch=0):
         ax.axis('off')
         ax.set_aspect('equal')
 
-    fig.suptitle('{} epoch'.format(epoch))
+    if epoch is not None:
+        fig.suptitle(f'{epoch} epoch')
     fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95)
 
 
@@ -98,3 +99,55 @@ def plot_losses(fig, train_loss, valid_loss,
     ax.set_xlabel('epoch')
 
     fig.align_labels()
+
+
+def plot_2D_Manifold(fig, model, device, z_sumple, col=10, epoch=None):
+    row = col
+
+    x = np.tile(np.linspace(-2, 2, col), row)
+    y = np.repeat(np.linspace(2, -2, row), col)
+    z = np.stack([x, y]).transpose()
+    zeros = np.zeros(shape=(z.shape[0], z_sumple.shape[1] - z.shape[1]))
+    z = np.concatenate([z, zeros], axis=1)
+
+    if z_sumple.shape[1] > 2:
+        z_sumple = torch2numpy(z_sumple)
+        pca = PCA()
+        pca.fit(z_sumple)
+        z = pca.inverse_transform(z)
+    z = torch.from_numpy(z.astype(np.float32)).to(device)
+
+    seq = model.generate(z, device=device)
+
+    for i, seq in enumerate(seq):
+        lines_ans = strokes_to_lines(seq)
+        ax = fig.add_subplot(row, col, i + 1)
+        ax.plot(lines_ans[:, 0], -lines_ans[:, 1], color='black')
+        ax.axis('off')
+        ax.set_aspect('equal')
+
+    if epoch is not None:
+        fig.suptitle(f'{epoch} epoch')
+    fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95)
+
+
+def plot_latent_traversal(fig, model, device, row, col=10, epoch=None):
+    gradation = np.linspace(-2, 2, col)
+    z = np.zeros(shape=(row, col, row))
+    for i in range(row):
+        z[i, :, i] = gradation
+    z = z.reshape(-1, row)
+    z = torch.from_numpy(z.astype(np.float32)).to(device)
+
+    seq = model.generate(z, device=device)
+
+    for i, seq in enumerate(seq):
+        lines_ans = strokes_to_lines(seq)
+        ax = fig.add_subplot(row, col, i + 1)
+        ax.plot(lines_ans[:, 0], -lines_ans[:, 1], color='black')
+        ax.axis('off')
+        ax.set_aspect('equal')
+
+    if epoch is not None:
+        fig.suptitle(f'{epoch} epoch')
+    fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95)

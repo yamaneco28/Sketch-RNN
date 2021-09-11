@@ -7,6 +7,8 @@ class SeqVAE(nn.Module):
     def __init__(self, z_dim=2, input_dim=2):
         super().__init__()
 
+        self.z_dim = z_dim
+        self.input_dim = input_dim
         self.LSTM_dim = 100
         self.LSTM_layer_num = 1
 
@@ -65,6 +67,32 @@ class SeqVAE(nn.Module):
         y = self.decoder(x, z)
 
         return y, mean, std
+
+    def generate(self, z=None, length=100, device='cpu', batch_size=1):
+        if z is None:
+            z = torch.randn(size=(batch_size, self.z_dim)).to(device)
+        else:
+            batch_size = z.shape[0]
+        h = self.dec_dense_h(z)
+        c = self.dec_dense_c(z)
+        h = h.reshape(h.shape[0], self.LSTM_layer_num, self.LSTM_dim)
+        c = c.reshape(c.shape[0], self.LSTM_layer_num, self.LSTM_dim)
+        h = h.permute(1, 0, 2).contiguous()
+        c = c.permute(1, 0, 2).contiguous()
+
+        x = torch.zeros(size=(batch_size, 1, self.input_dim)).to(device)
+        z = z.unsqueeze(1)
+
+        x_list = []
+        i = 0
+        while i < length:
+            x = torch.cat([x, z], dim=2)
+            x, (h, c) = self.dec_lstm(x, (h, c))
+            x = self.dec_dense(x)
+            x_list.append(x)
+            i += 1
+        x = torch.cat(x_list, dim=1)
+        return x
 
 
 class VAELoss(nn.Module):
