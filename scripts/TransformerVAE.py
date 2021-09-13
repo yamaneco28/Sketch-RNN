@@ -123,7 +123,7 @@ class TransformerVAE(nn.Module):
 
 
 class VAELoss(nn.Module):
-    def __init__(self, weight_mse: float = 10000.0):
+    def __init__(self, weight_mse: float = 100.0):
         super().__init__()
 
         self.weight_mse = weight_mse

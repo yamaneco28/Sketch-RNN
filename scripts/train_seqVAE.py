@@ -28,6 +28,7 @@ def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
     train_losses_mse, valid_losses_mse = [], []
     train_losses_kl, valid_losses_kl = [], []
     total_elapsed_time = 0
+    early_stopping_counter = 0
     best_test = 1e10
     optimizer = optimizer_cls(model.parameters(), lr=lr)
 
@@ -128,16 +129,8 @@ def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
         log += '  valid loss: {:.6f} ({:.6f}, {:.6f})'.format(
             valid_loss, valid_loss_mse, valid_loss_kl)
         log += '  elapsed time: {:.3f}'.format(elapsed_time)
+        log += '  early stopping: {}'.format(early_stopping_counter)
         print(log)
-
-        # save model
-        if valid_loss < best_test:
-            best_test = valid_loss
-            path_model_param_best = os.path.join(
-                out_dir, 'model_param_best.pt')
-            torch.save(model.state_dict(), path_model_param_best)
-            if wandb_flag:
-                wandb.save(path_model_param_best)
 
         if epoch % 100 == 0:
             model_param_dir = os.path.join(out_dir, 'model_param')
@@ -213,6 +206,24 @@ def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
                 'valid_loss_kl': valid_loss_kl,
             })
             wandb.save(path_checkpoint)
+
+        if valid_loss < best_test:
+            best_test = valid_loss
+            early_stopping_counter = 0
+
+            # save model
+            path_model_param_best = os.path.join(
+                out_dir, 'model_param_best.pt')
+            torch.save(model.state_dict(), path_model_param_best)
+            if wandb_flag:
+                wandb.save(path_model_param_best)
+
+        else:
+            # Early Stopping
+            early_stopping_counter += 1
+            if early_stopping_counter >= 1000:
+                print('Early Stopping!')
+                break
 
     print('total elapsed time: {} [s]'.format(total_elapsed_time))
 
