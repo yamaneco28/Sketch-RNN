@@ -15,7 +15,7 @@ sns.set()
 sys.path.append('.')
 sys.path.append('..')
 from scripts.seqVAE import SeqVAE, VAELoss
-from scripts.TransformerVAE import TransformerVAE, VAELoss
+# from scripts.TransformerVAE import TransformerVAE, VAELoss
 from scripts.quick_draw_dataset import QuickDrawDataset
 from scripts.plot_result import *
 from scripts.print_progress_bar import print_progress_bar
@@ -249,8 +249,8 @@ def main(args):
         drop_last=True,
     )
 
-    # model = SeqVAE(z_dim=5, input_dim=2)
-    model = TransformerVAE(z_dim=10, input_dim=2)
+    model = SeqVAE(z_dim=5, input_dim=2)
+    # model = TransformerVAE(z_dim=10, input_dim=2)
 
     if not os.path.exists('results'):
         os.mkdir('results')

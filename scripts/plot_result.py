@@ -8,15 +8,15 @@ def torch2numpy(tensor):
     return tensor.cpu().detach().numpy().copy()
 
 
-def strokes_to_lines(strokes):
-    x = 0
-    y = 0
-    line = []
-    for i in range(len(strokes)):
-        x += float(strokes[i, 0])
-        y += float(strokes[i, 1])
-        line.append([x, y])
-    return np.array(line)
+# def strokes_to_lines(strokes):
+#     x = 0
+#     y = 0
+#     line = []
+#     for i in range(len(strokes)):
+#         x += float(strokes[i, 0])
+#         y += float(strokes[i, 1])
+#         line.append([x, y])
+#     return np.array(line)
 
 
 def plot_reconstructed(fig, seq_ans, seq_hat, col=4, epoch=None):
@@ -29,15 +29,15 @@ def plot_reconstructed(fig, seq_ans, seq_hat, col=4, epoch=None):
 
     row = -(-len(seq_ans) // col)
     for i, (seq_ans, seq_hat) in enumerate(zip(seq_ans, seq_hat)):
-        lines_ans = strokes_to_lines(seq_ans)
+        # lines_ans = strokes_to_lines(seq_ans)
         ax = fig.add_subplot(row, 2 * col, 2 * i + 1)
-        ax.plot(lines_ans[:, 0], -lines_ans[:, 1], color='black')
+        ax.plot(seq_ans[:, 0], -seq_ans[:, 1], color='black')
         ax.axis('off')
         ax.set_aspect('equal')
 
-        lines_hat = strokes_to_lines(seq_hat)
+        # lines_hat = strokes_to_lines(seq_hat)
         ax = fig.add_subplot(row, 2 * col, 2 * i + 2)
-        ax.plot(lines_hat[:, 0], -lines_hat[:, 1], color='tab:blue')
+        ax.plot(seq_hat[:, 0], -seq_hat[:, 1], color='tab:blue')
         ax.axis('off')
         ax.set_aspect('equal')
 
@@ -118,11 +118,12 @@ def plot_2D_Manifold(fig, model, device, z_sumple, col=10, epoch=None):
     z = torch.from_numpy(z.astype(np.float32)).to(device)
 
     seq = model.generate(z, device=device)
+    seq = torch2numpy(seq)
 
     for i, seq in enumerate(seq):
-        lines_ans = strokes_to_lines(seq)
+        # lines_ans = strokes_to_lines(seq)
         ax = fig.add_subplot(row, col, i + 1)
-        ax.plot(lines_ans[:, 0], -lines_ans[:, 1], color='black')
+        ax.plot(seq[:, 0], -seq[:, 1], color='black')
         ax.axis('off')
         ax.set_aspect('equal')
 
@@ -140,11 +141,12 @@ def plot_latent_traversal(fig, model, device, row, col=10, epoch=None):
     z = torch.from_numpy(z.astype(np.float32)).to(device)
 
     seq = model.generate(z, device=device)
+    seq = torch2numpy(seq)
 
     for i, seq in enumerate(seq):
-        lines_ans = strokes_to_lines(seq)
+        # lines_ans = strokes_to_lines(seq)
         ax = fig.add_subplot(row, col, i + 1)
-        ax.plot(lines_ans[:, 0], -lines_ans[:, 1], color='black')
+        ax.plot(seq[:, 0], -seq[:, 1], color='black')
         ax.axis('off')
         ax.set_aspect('equal')
 

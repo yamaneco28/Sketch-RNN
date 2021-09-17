@@ -28,6 +28,7 @@ class QuickDrawDataset(Dataset):
 
     def __getitem__(self, idx):
         data = self.data[idx][:, :-1].astype(np.float32)
+        data = self.strokes_to_lines(data)
         data /= np.std(data)
         data = self._padding(data)
         label = self.label[idx]
@@ -65,3 +66,12 @@ class QuickDrawDataset(Dataset):
                 idx, data = future.result()
                 data_list[idx] = data
         return np.array(data_list, dtype=object)
+
+    def strokes_to_lines(self, strokes):
+        x, y = 0, 0
+        line = []
+        for stroke in strokes:
+            x += stroke[0]
+            y += stroke[1]
+            line.append([x, y])
+        return np.array(line, dtype=np.float32)

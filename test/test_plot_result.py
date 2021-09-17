@@ -26,10 +26,10 @@ class TestPlotResult(unittest.TestCase):
 
         dataloader = torch.utils.data.DataLoader(
             dataset,
-            batch_size=100,
+            batch_size=10,
             shuffle=True,
-            num_workers=8,
-            pin_memory=True,
+            # num_workers=8,
+            # pin_memory=True,
         )
 
         folder_name = 'test_image'
