@@ -26,9 +26,11 @@ class TestVAE(unittest.TestCase):
             pin_memory=True,
         )
 
+        x, label = dataset[0]
         model = SeqVAE(
             z_dim=5,
-            input_dim=2,
+            input_dim=x.shape[-1],
+            label_dim=10,
         )
         model.train()
         print(model)
@@ -42,7 +44,8 @@ class TestVAE(unittest.TestCase):
 
         for x, label in tqdm(dataloader):
             x = x.to(device)
-            y, mean, std = model(x)
+            label = label.to(device)
+            y, mean, std = model(x, label)
             # print('x:', x.shape)
             # print('y:', y.shape)
             # print('mean:', mean.shape)

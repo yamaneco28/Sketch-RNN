@@ -114,7 +114,8 @@ def plot_losses(fig, train_loss, valid_loss,
     fig.align_labels()
 
 
-def plot_2D_Manifold(fig, model, device, z_sumple, col=10, epoch=None):
+def plot_2D_Manifold(fig, model, device, z_sumple,
+                     col=10, epoch=None, label=None):
     row = col
 
     x = np.tile(np.linspace(-2, 2, col), row)
@@ -130,7 +131,7 @@ def plot_2D_Manifold(fig, model, device, z_sumple, col=10, epoch=None):
         z = pca.inverse_transform(z)
     z = torch.from_numpy(z.astype(np.float32)).to(device)
 
-    seq = model.generate(z, device=device)
+    seq = model.generate(z, device=device, label=label)
     seq = torch2numpy(seq)
 
     for i, seq in enumerate(seq):
@@ -146,7 +147,8 @@ def plot_2D_Manifold(fig, model, device, z_sumple, col=10, epoch=None):
     fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95)
 
 
-def plot_latent_traversal(fig, model, device, row, col=10, epoch=None):
+def plot_latent_traversal(fig, model, device, row, col=10,
+                          epoch=None, label=None):
     gradation = np.linspace(-2, 2, col)
     z = np.zeros(shape=(row, col, row))
     for i in range(row):
@@ -154,7 +156,7 @@ def plot_latent_traversal(fig, model, device, row, col=10, epoch=None):
     z = z.reshape(-1, row)
     z = torch.from_numpy(z.astype(np.float32)).to(device)
 
-    seq = model.generate(z, device=device)
+    seq = model.generate(z, device=device, label=label)
     seq = torch2numpy(seq)
 
     for i, seq in enumerate(seq):

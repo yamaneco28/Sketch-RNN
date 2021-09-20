@@ -22,8 +22,8 @@ from scripts.print_progress_bar import print_progress_bar
 
 
 def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
-              out_dir='', lr=0.001, optimizer_cls=optim.Adam,
-              wandb_flag=False, gpu_num=0):
+                 out_dir='', lr=0.001, optimizer_cls=optim.Adam,
+                 wandb_flag=False, gpu_num=0, conditional=False):
     train_losses, valid_losses = [], []
     train_losses_mse, valid_losses_mse = [], []
     train_losses_kl, valid_losses_kl = [], []
@@ -63,7 +63,10 @@ def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
             x = x.to(device)
 
             with torch.cuda.amp.autocast():
-                y, mean, std = model(x)
+                if conditional:
+                    y, mean, std = model(x, label)
+                else:
+                    y, mean, std = model(x)
                 loss_mse, loss_kl = loss_fn(x, y, mean, std)
 
             loss = loss_mse + loss_kl
@@ -97,7 +100,10 @@ def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
             x = x.to(device)
 
             with torch.cuda.amp.autocast():
-                y, mean, std = model(x)
+                if conditional:
+                    y, mean, std = model(x, label)
+                else:
+                    y, mean, std = model(x)
                 loss_mse, loss_kl = loss_fn(x, y, mean, std)
 
             loss = loss_mse + loss_kl
@@ -172,15 +178,22 @@ def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
             fig_latent_space.savefig(
                 os.path.join(out_dir, 'latent_space.png'))
 
+            if conditional:
+                label = label[0]
+            else:
+                label = None
+
             fig_2D_Manifold.clf()
             plot_2D_Manifold(fig_2D_Manifold, model.module, device,
-                             z_sumple=valid_mean, col=20, epoch=epoch)
+                             z_sumple=valid_mean, col=20,
+                             epoch=epoch, label=label)
             fig_2D_Manifold.savefig(
                 os.path.join(out_dir, '2D_Manifold.png'))
 
             fig_latent_traversal.clf()
             plot_latent_traversal(fig_latent_traversal, model.module, device,
-                                  row=valid_mean.shape[1], col=10, epoch=epoch)
+                                  row=valid_mean.shape[1], col=10,
+                                  epoch=epoch, label=label)
             fig_latent_traversal.savefig(
                 os.path.join(out_dir, 'latent_traversal.png'))
 
@@ -250,7 +263,7 @@ def main(args):
     )
 
     x, label = train_dataset[0]
-    model = SeqVAE(z_dim=5, input_dim=x.shape[-1])
+    model = SeqVAE(z_dim=5, input_dim=x.shape[-1], label_dim=10)
     # model = TransformerVAE(z_dim=10, input_dim=2)
 
     if not os.path.exists('results'):
@@ -283,6 +296,7 @@ def main(args):
         lr=args.learning_rate,
         wandb_flag=args.wandb,
         gpu_num=args.gpu_num,
+        conditional=args.conditional,
     )
 
 
@@ -296,6 +310,7 @@ def argparse():
     parser.add_argument('--wandb', action='store_true')
     tp = lambda x:list(map(int, x.split(',')))
     parser.add_argument('--gpu_num', type=tp, default='0')
+    parser.add_argument('--conditional', action='store_true')
     return parser.parse_args()
 
 
