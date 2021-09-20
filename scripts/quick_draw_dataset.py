@@ -24,12 +24,12 @@ class QuickDrawDataset(Dataset):
             self.max_length = max_length
 
     def __len__(self):
-        return len(self.data)
+        return len(self.data)-1
 
     def __getitem__(self, idx):
-        data = self.data[idx][:, :-1].astype(np.float32)
+        data = self.data[idx].astype(np.float32)
         data = self.strokes_to_lines(data)
-        data /= np.std(data)
+        data[:, :-1] /= np.std(data[:, :-1])
         data = self._padding(data)
         label = self.label[idx]
         return data, label
@@ -68,10 +68,11 @@ class QuickDrawDataset(Dataset):
         return np.array(data_list, dtype=object)
 
     def strokes_to_lines(self, strokes):
-        x, y = 0, 0
+        x, y, z = 0, 0, 0
         line = []
         for stroke in strokes:
             x += stroke[0]
             y += stroke[1]
-            line.append([x, y])
+            z = stroke[2]
+            line.append([x, y, z])
         return np.array(line, dtype=np.float32)

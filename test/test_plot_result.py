@@ -26,7 +26,7 @@ class TestPlotResult(unittest.TestCase):
 
         dataloader = torch.utils.data.DataLoader(
             dataset,
-            batch_size=10,
+            batch_size=16,
             shuffle=True,
             # num_workers=8,
             # pin_memory=True,
@@ -53,8 +53,8 @@ class TestPlotResult(unittest.TestCase):
         end = time.time()
         print('elasped time:', end - start)
 
-        model = SeqVAE(z_dim)
-        model.load_state_dict(torch.load('../model_param/model_param_best.pt'))
+        model = SeqVAE(z_dim, input_dim=x.shape[-1])
+        # model.load_state_dict(torch.load('../model_param/model_param_best.pt'))
         model.eval()
 
         # device setting

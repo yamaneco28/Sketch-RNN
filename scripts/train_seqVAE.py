@@ -249,7 +249,8 @@ def main(args):
         drop_last=True,
     )
 
-    model = SeqVAE(z_dim=5, input_dim=2)
+    x, label = train_dataset[0]
+    model = SeqVAE(z_dim=5, input_dim=x.shape[-1])
     # model = TransformerVAE(z_dim=10, input_dim=2)
 
     if not os.path.exists('results'):

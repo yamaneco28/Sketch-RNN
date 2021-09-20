@@ -16,7 +16,7 @@ class TestQuickDrawDataset(unittest.TestCase):
         dataset = QuickDrawDataset(datafolder, split='valid')
         torchdataloader = DataLoader(
             dataset,
-            batch_size=100,
+            batch_size=1000,
             shuffle=True,
             # num_workers=8,
             # pin_memory=True,
@@ -27,10 +27,10 @@ class TestQuickDrawDataset(unittest.TestCase):
                 pass
                 # print('#', i)
                 print('shape:', x.shape)
-                print('type:', x.dtype)
-                import torch
-                print(torch.max(x))
-                print(torch.min(x))
+                # print(x[0, :, 2])
+                # import torch
+                # print(torch.max(x))
+                # print(torch.min(x))
             end = time.time()
             print('elapsed time:', end - start)
 
