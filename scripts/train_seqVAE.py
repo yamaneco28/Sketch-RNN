@@ -16,7 +16,8 @@ sys.path.append('.')
 sys.path.append('..')
 from scripts.seqVAE import SeqVAE, VAELoss
 # from scripts.TransformerVAE import TransformerVAE, VAELoss
-from scripts.quick_draw_dataset import QuickDrawDataset
+# from scripts.quick_draw_dataset import QuickDrawDataset
+from scripts.motion_dataset import MotionDataset
 from scripts.plot_result import *
 from scripts.print_progress_bar import print_progress_bar
 
@@ -61,6 +62,7 @@ def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
         model.train()
         for i, (x, label) in enumerate(train_loader):
             x = x.to(device)
+            label = label.to(device)
 
             with torch.cuda.amp.autocast():
                 if conditional:
@@ -98,6 +100,7 @@ def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
         model.eval()
         for x, label in valid_loader:
             x = x.to(device)
+            label = label.to(device)
 
             with torch.cuda.amp.autocast():
                 if conditional:
@@ -242,9 +245,16 @@ def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
 
 
 def main(args):
-    train_dataset = QuickDrawDataset(args.data_path, split='train')
-    valid_dataset = QuickDrawDataset(args.data_path, split='valid',
-                                     max_length=train_dataset.max_length)
+    # train_dataset = QuickDrawDataset(args.data_path, split='train')
+    # valid_dataset = QuickDrawDataset(args.data_path, split='valid',
+    #                                  max_length=train_dataset.max_length)
+    dataset = MotionDataset(args.data_path)
+    train_ratio = 0.8
+    train_size = int(train_ratio * len(dataset))
+    train_indices = list(range(0,train_size))
+    valid_indices = list(range(train_size, len(dataset)))
+    train_dataset = torch.utils.data.dataset.Subset(dataset, train_indices)
+    valid_dataset = torch.utils.data.dataset.Subset(dataset, valid_indices)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
@@ -259,11 +269,18 @@ def main(args):
         shuffle=True,
         num_workers=8,
         # pin_memory=True,
-        drop_last=True,
+        # drop_last=True,
     )
 
     x, label = train_dataset[0]
-    model = SeqVAE(z_dim=5, input_dim=x.shape[-1], label_dim=10)
+    label_dim = 0
+    if args.conditional:
+        label_dim = max(train_dataset.label)
+    model = SeqVAE(
+        z_dim=5,
+        input_dim=x.shape[-1],
+        label_dim=label_dim,
+    )
     # model = TransformerVAE(z_dim=10, input_dim=2)
 
     if not os.path.exists('results'):
@@ -282,6 +299,7 @@ def main(args):
         config.batch_size = args.batch_size
         config.learning_rate = args.learning_rate
         config.gpu_num = args.gpu_num
+        config.conditional = args.conditional
 
         config.train_data_num = len(train_dataset)
         config.valid_data_num = len(valid_dataset)
@@ -305,7 +323,7 @@ def argparse():
     parser = ArgumentParser()
     parser.add_argument('--data_path', type=str, default='mnist')
     parser.add_argument('--epoch', type=int, default=10000)
-    parser.add_argument('--batch_size', type=int, default=10000)
+    parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--learning_rate', type=float, default=0.001)
     parser.add_argument('--wandb', action='store_true')
     tp = lambda x:list(map(int, x.split(',')))

@@ -29,6 +29,7 @@ class QuickDrawDataset(Dataset):
     def __getitem__(self, idx):
         data = self.data[idx].astype(np.float32)
         data = self.strokes_to_lines(data)
+        data[:, :-1] -= np.mean(data[:, :-1], axis=0, keepdims=True)
         data[:, :-1] /= np.std(data[:, :-1])
         data = self._padding(data)
         label = self.label[idx]

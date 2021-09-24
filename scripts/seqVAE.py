@@ -16,7 +16,7 @@ class SeqVAE(nn.Module):
         label_vec_dim = 0
         if label_dim != 0:
             self.label_dim = label_dim
-            label_vec_dim = 2
+            label_vec_dim = 10
             self.dense_label = nn.Linear(label_dim, label_vec_dim)
 
         # encoder
