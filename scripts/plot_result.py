@@ -30,7 +30,26 @@ def strokes_to_lines(strokes):
     return lines
 
 
-def plot_reconstructed(fig, seq_ans, seq_hat, col=4, epoch=None):
+def calc_forward_kinematics(theta, l1=165, l2=200):
+    z = l1 * np.sin(theta[1]) + l2 * np.sin(theta[1] + theta[2])
+    xy = l1 * np.cos(theta[1]) + l2 * np.cos(theta[1] + theta[2])
+    x = xy * np.sin(theta[0])
+    y = xy * np.cos(theta[0])
+    return [x, y, z]
+
+
+def pos_preprocess(pos):
+    pos = np.array([calc_forward_kinematics(p) for p in pos])
+    pos = pos[pos[:, 2] < 100]
+    return pos
+
+
+# def moving_average(x, num=10):
+#     b = np.ones(num) / num
+#     return np.convolve(x, b, mode='same')
+
+
+def plot_reconstructed(fig, seq_ans, seq_hat, col=4, epoch=None, label=None):
     seq_ans = torch2numpy(seq_ans)
     seq_hat = torch2numpy(seq_hat)
 
@@ -39,20 +58,31 @@ def plot_reconstructed(fig, seq_ans, seq_hat, col=4, epoch=None):
     seq_hat = seq_hat[:seqnum]
 
     row = -(-len(seq_ans) // col)
+    axes = fig.subplots(row, 2 * col, sharex='all', sharey='all')
     for i, (seq_ans, seq_hat) in enumerate(zip(seq_ans, seq_hat)):
-        ax = fig.add_subplot(row, 2 * col, 2 * i + 1)
-        seq_ans = strokes_to_lines(seq_ans)
-        for seq_ans in seq_ans:
-            ax.plot(seq_ans[:, 0], -seq_ans[:, 1])
+        # ax = fig.add_subplot(row, 2 * col, 2 * i + 1)
+        # seq_ans = strokes_to_lines(seq_ans)
+        # for seq_ans in seq_ans:
+        #     ax.plot(seq_ans[:, 0], -seq_ans[:, 1])
+        ax = axes[i // col, 2 * (i % col)]
+        pos_ans = pos_preprocess(seq_ans)
+        ax.plot(pos_ans[:, 0], pos_ans[:, 1])
         ax.axis('off')
-        ax.set_aspect('equal')
+        # ax.set_aspect('equal')
+        if label is not None:
+            ax.set_title(label[i])
 
-        ax = fig.add_subplot(row, 2 * col, 2 * i + 2)
-        seq_hat = strokes_to_lines(seq_hat)
-        for seq_hat in seq_hat:
-            ax.plot(seq_hat[:, 0], -seq_hat[:, 1])
+        # ax = fig.add_subplot(row, 2 * col, 2 * i + 2)
+        # seq_hat = strokes_to_lines(seq_hat)
+        # for seq_hat in seq_hat:
+        #     ax.plot(seq_hat[:, 0], -seq_hat[:, 1])
+        ax = axes[i // col, 2 * (i % col) + 1]
+        pos_hat = pos_preprocess(seq_hat)
+        ax.plot(pos_hat[:, 0], pos_hat[:, 1])
         ax.axis('off')
-        ax.set_aspect('equal')
+        # ax.set_aspect('equal')
+        if label is not None:
+            ax.set_title(label[i])
 
     if epoch is not None:
         fig.suptitle(f'{epoch} epoch')
@@ -134,11 +164,15 @@ def plot_2D_Manifold(fig, model, device, z_sumple,
     seq = model.generate(z, device=device, label=label)
     seq = torch2numpy(seq)
 
+    axes = fig.subplots(row, col, sharex='all', sharey='all')
     for i, seq in enumerate(seq):
-        ax = fig.add_subplot(row, col, i + 1)
-        seq = strokes_to_lines(seq)
-        for seq in seq:
-            ax.plot(seq[:, 0], -seq[:, 1])
+        # ax = fig.add_subplot(row, col, i + 1)
+        ax = axes[i // col, i % col]
+        # seq = strokes_to_lines(seq)
+        # for seq in seq:
+        #     ax.plot(seq[:, 0], -seq[:, 1])
+        pos = pos_preprocess(seq)
+        ax.plot(pos[:, 0], pos[:, 1])
         ax.axis('off')
         ax.set_aspect('equal')
 
@@ -159,11 +193,15 @@ def plot_latent_traversal(fig, model, device, row, col=10,
     seq = model.generate(z, device=device, label=label)
     seq = torch2numpy(seq)
 
+    axes = fig.subplots(row, col, sharex='all', sharey='all')
     for i, seq in enumerate(seq):
-        ax = fig.add_subplot(row, col, i + 1)
-        seq = strokes_to_lines(seq)
-        for seq in seq:
-            ax.plot(seq[:, 0], -seq[:, 1])
+        # ax = fig.add_subplot(row, col, i + 1)
+        ax = axes[i // col, i % col]
+        # seq = strokes_to_lines(seq)
+        # for seq in seq:
+        #     ax.plot(seq[:, 0], -seq[:, 1])
+        pos = pos_preprocess(seq)
+        ax.plot(pos[:, 0], pos[:, 1])
         ax.axis('off')
         ax.set_aspect('equal')
 

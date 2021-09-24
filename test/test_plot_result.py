@@ -14,6 +14,7 @@ sys.path.append('.')
 sys.path.append('..')
 from scripts.plot_result import *
 from scripts.quick_draw_dataset import QuickDrawDataset
+from scripts.motion_dataset import MotionDataset
 from dataset_path import datafolder
 from scripts.seqVAE import SeqVAE
 
@@ -22,7 +23,9 @@ class TestPlotResult(unittest.TestCase):
     def test_plot_result(self):
         print('\n========== test plot result ==========')
 
-        dataset = QuickDrawDataset(datafolder, split='valid')
+        # dataset = QuickDrawDataset(datafolder, split='valid')
+        datafolder = '../../datasets/position_conditioned'
+        dataset = MotionDataset(datafolder, normalization=False)
 
         dataloader = torch.utils.data.DataLoader(
             dataset,
@@ -36,9 +39,11 @@ class TestPlotResult(unittest.TestCase):
         if not os.path.exists(folder_name):
             os.mkdir(folder_name)
 
+        label_string = np.array(['A', 'B', 'C', 'D'])
+
         for x, label in dataloader:
             fig = plt.figure(figsize=(20, 10))
-            plot_reconstructed(fig, x, x, col=4)
+            plot_reconstructed(fig, x, x, col=4, label=label_string[label])
             plt.savefig(folder_name + '/test_reconstructed.png')
             break
 

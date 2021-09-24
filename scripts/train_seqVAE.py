@@ -251,10 +251,12 @@ def main(args):
     dataset = MotionDataset(args.data_path)
     train_ratio = 0.8
     train_size = int(train_ratio * len(dataset))
-    train_indices = list(range(0,train_size))
-    valid_indices = list(range(train_size, len(dataset)))
-    train_dataset = torch.utils.data.dataset.Subset(dataset, train_indices)
-    valid_dataset = torch.utils.data.dataset.Subset(dataset, valid_indices)
+    valid_size = len(dataset) - train_size
+    # train_indices = list(range(0,train_size))
+    # valid_indices = list(range(train_size, len(dataset)))
+    # train_dataset = torch.utils.data.dataset.Subset(dataset, train_indices)
+    # valid_dataset = torch.utils.data.dataset.Subset(dataset, valid_indices)
+    train_dataset, valid_dataset = torch.utils.data.random_split(dataset, [train_size, valid_size])
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
