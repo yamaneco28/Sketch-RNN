@@ -3,16 +3,23 @@ import glob
 import numpy as np
 import os
 from concurrent import futures
+from transformers import CLIPTokenizerFast
+import torch
 
 
 class QuickDrawDataset(Dataset):
     def __init__(self, datafolder, split='train', max_length=None):
         paths = glob.glob('{}/*'.format(datafolder))
         self.data = self._load_datas(paths, split=split)
+
+        tokenizer = CLIPTokenizerFast.from_pretrained("openai/clip-vit-base-patch32")
         label_list = []
         for i in range(len(self.data)):
-            label_list.extend([i] * self.data[i].shape[0])
-        self.label = np.array(label_list)
+            label_str = os.path.splitext(os.path.basename(paths[i]))[0][10:]
+            label_token = tokenizer([f'Sketching {label_str}'], padding=True, return_tensors='pt')
+            label_list.extend([label_token['input_ids']] * self.data[i].shape[0])
+        self.label = torch.cat(label_list)
+
         self.data = np.concatenate(self.data, axis=0)
         data_size = sum([data_part.__sizeof__() for data_part in self.data])
         print('data size: {} [MiB]'.format(data_size / 1.049e+6))

@@ -70,7 +70,8 @@ def plot_latent_space(fig, zs, labels, epoch=0):
     # zs = TSNE(n_components=2, random_state=0).fit_transform(zs)
 
     ax = fig.add_subplot(111)
-    im = ax.scatter(zs[:, 0], zs[:, 1], c=labels, cmap='jet', marker='.')
+    # im = ax.scatter(zs[:, 0], zs[:, 1], c=labels, cmap='jet', marker='.')
+    im = ax.scatter(zs[:, 0], zs[:, 1], cmap='jet', marker='.')
     lim = np.max(np.abs(zs)) * 1.1
     ax.set_xlim(-lim, lim)
     ax.set_ylim(-lim, lim)

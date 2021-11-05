@@ -6,7 +6,7 @@ import time
 import sys
 sys.path.append('.')
 sys.path.append('..')
-from scripts.quick_draw_dataset import QuickDrawDataset
+from scripts.dataset.quick_draw_dataset import QuickDrawDataset
 from dataset_path import datafolder
 
 
@@ -14,6 +14,7 @@ class TestQuickDrawDataset(unittest.TestCase):
     def test_dataset(self):
         print('\n---------- quick draw dataset test ----------')
         dataset = QuickDrawDataset(datafolder, split='valid')
+        print(dataset.label)
         torchdataloader = DataLoader(
             dataset,
             batch_size=1000,
@@ -26,7 +27,7 @@ class TestQuickDrawDataset(unittest.TestCase):
             for i, (x, label) in enumerate(tqdm(torchdataloader)):
                 pass
                 # print('#', i)
-                print('shape:', x.shape)
+                # print('shape:', x.shape)
                 # print(x[0, :, 2])
                 # import torch
                 # print(torch.max(x))
