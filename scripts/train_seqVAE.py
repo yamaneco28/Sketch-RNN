@@ -171,7 +171,7 @@ def train_seqVAE(n_epochs, train_loader, valid_loader, model, loss_fn,
         # show output
         if epoch % 10 == 0:
             fig_reconstructed.clf()
-            plot_reconstructed(fig_reconstructed, x, y, col=10, epoch=epoch)
+            plot_reconstructed(fig_reconstructed, x, y, col=4, epoch=epoch)
             fig_reconstructed.savefig(
                 os.path.join(out_dir, 'reconstructed.png'))
 
@@ -271,13 +271,13 @@ def main(args):
         shuffle=True,
         num_workers=8,
         # pin_memory=True,
-        # drop_last=True,
+        drop_last=True,
     )
 
     x, label = train_dataset[0]
     label_dim = 0
     if args.conditional:
-        label_dim = max(train_dataset.label)
+        label_dim = max(dataset.label) + 1
     model = SeqVAE(
         z_dim=5,
         input_dim=x.shape[-1],

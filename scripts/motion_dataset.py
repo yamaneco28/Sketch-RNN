@@ -77,7 +77,7 @@ class MotionDataset(Dataset):
             pad = self.max_length - input_length
             zeros = [x[-1]] * pad
             zeros = np.array(zeros)
-            x = np.concatenate([x, zeros])
+            x = np.concatenat   e([x, zeros])
         elif input_length > self.max_length:
             x = x[:self.max_length]
         return x

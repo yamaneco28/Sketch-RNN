@@ -23,9 +23,11 @@ def main():
     z_dim = 5
     model = SeqVAE(
         z_dim=z_dim,
-        input_dim=3,
+        input_dim=18,
     )
-    state_dict = load_model_param('./model_param/model_param_best.pt')
+    model_param_path = './model_param/model_param_best.pt'
+    print('load model param from {}'.format(model_param_path))
+    state_dict = load_model_param(model_param_path)
     model.load_state_dict(state_dict)
     model.train()
     print(model)

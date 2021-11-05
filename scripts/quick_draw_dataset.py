@@ -13,6 +13,7 @@ class QuickDrawDataset(Dataset):
         for i in range(len(self.data)):
             label_list.extend([i] * self.data[i].shape[0])
         self.label = np.array(label_list)
+        print(self.label)
         self.data = np.concatenate(self.data, axis=0)
         data_size = sum([data_part.__sizeof__() for data_part in self.data])
         print('data size: {} [MiB]'.format(data_size / 1.049e+6))
