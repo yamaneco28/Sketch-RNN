@@ -1,5 +1,5 @@
-# FROM nvidia/cuda:11.4.0-devel-ubuntu20.04
-FROM ubuntu:20.04
+FROM nvidia/cuda:11.4.0-devel-ubuntu20.04
+# FROM ubuntu:20.04
 
 # Force color prompt in terminal.
 RUN sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/' /root/.bashrc
@@ -34,8 +34,11 @@ SHELL ["/usr/bin/fish", "-c"]
 # install fish plagin
 RUN curl https://git.io/fisher --create-dirs -sLo ~/.config/fish/functions/fisher.fish
 RUN fisher install jethrokuan/z
-RUN curl -L https://get.oh-my.fish > install
-RUN fish install --path=~/.local/share/omf --config=~/.config/omf
-RUN omf install flash
+# RUN fisher install simnalamburt/shellder
+# RUN fisher install oh-my-fish/theme-flash
+# RUN curl -L https://get.oh-my.fish > install
+# RUN fish install --path=~/.local/share/omf --config=~/.config/omf
+# RUN omf install flash
 
 WORKDIR /root/workspace
+

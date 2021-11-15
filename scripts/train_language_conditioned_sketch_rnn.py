@@ -259,7 +259,11 @@ def main(args):
     print('device:', device)
 
     x, label = train_dataset[0]
-    model = LanguageConditionedSketchRNN(z_dim=512, input_dim=x.shape[-1], device=device)
+    model = LanguageConditionedSketchRNN(
+        z_dim=512,
+        input_dim=x.shape[-1],
+        device=device,
+    )
 
     if not os.path.exists('results'):
         os.mkdir('results')
